@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<layout version="2.3.729" updatetime="20170906">
+    <switch>
+        <type id="10064" src="type_06.png" title="体育" selected="true">
+            <image src="_b12ecceb5e5f428eada1b0b7e7b79fcc.jpg" title="尤文图斯" content="17/18意甲第2轮：迪巴拉完成帽子戏法，尤文图斯客场4—2逆转热那亚。©壹刻传媒" cpname="" download="" contenturl="" packagename=""/>
+        </type>
+    </switch>
+</layout>
