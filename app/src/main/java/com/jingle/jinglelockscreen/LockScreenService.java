@@ -22,15 +22,14 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import cn.aigestudio.downloader.bizs.DLManager;
 import cn.aigestudio.downloader.interfaces.SimpleDListener;
@@ -135,7 +134,7 @@ public class LockScreenService extends Service {
                         public void onFinish(File file) {
                             super.onFinish(file);
                             zipFileList.add(file);
-                            ToastUtil.showToast(getApplicationContext(), "下载完成");
+                            // ToastUtil.showToast(getApplicationContext(), "下载完成");
 
                         }
 
@@ -218,7 +217,7 @@ public class LockScreenService extends Service {
     public void getImageList() {
         for (File zipFile : zipFileList
                 ) {
-            imageList.add(unZipFile(zipFile));
+            unZipFile(zipFile);
         }
     }
 
@@ -229,50 +228,53 @@ public class LockScreenService extends Service {
      * @return
      */
 
-    public File unZipFile(File file) {
-        File imageFile = null;
+    public void unZipFile(final File file) {
         String sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        String imageDirPath = sdPath + "/" + file.getAbsolutePath().replaceAll(".zip", "");
+        final String imageDirPath = sdPath + "/" + file.getName().replaceAll(".zip", "");
         File imageDir = new File(imageDirPath);
         if (!imageDir.exists()) {
             imageDir.mkdirs();
         }
-        try {
-            ZipFile zipFile = new ZipFile(file);
-            InputStream inputStream = null;
-            Enumeration enumeration = zipFile.entries();
-            while (enumeration.hasMoreElements()) {
-                ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();
-                inputStream = new BufferedInputStream(zipFile.getInputStream(zipEntry));
-                imageFile = new File(imageDirPath + "/" + zipEntry.getName());
-                FileOutputStream fileOutputStream = new FileOutputStream(imageFile);
-                byte[] buffer = new byte[8192];
-                int len;
-                while ((len = inputStream.read()) != -1) {
-                    fileOutputStream.write(buffer, 0, len);
-                    fileOutputStream.flush();
-                }
-                fileOutputStream.close();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-            }
-            inputStream.close();
-          /*  FileInputStream fis = new FileInputStream(file.getAbsolutePath());
-            ZipInputStream zipIs = new ZipInputStream(new BufferedInputStream(fis));
-            ZipEntry zipEntry;
-            String zipName;
-            while ((zipEntry = zipIs.getNextEntry()) != null) {
-                zipName = zipEntry.getName();
-                imageFile = new File(imageDirPath + File.pathSeparator + zipName);
-                imageFile.createNewFile();
-                FileOutputStream out = new FileOutputStream(imageFile);
-                int len;
-                byte[] buffer = new byte[4096];
-                while ((len = zipIs.read(buffer)) != -1) {
-                    out.write(buffer, 0, len);
-                    out.flush();
-                }
-                out.close();
-             *//*   int len;
+                try {
+                   /* ZipFile zipFile = new ZipFile(file);
+                    InputStream inputStream = null;
+                    Enumeration enumeration = zipFile.entries();
+                    while (enumeration.hasMoreElements()) {
+                        ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();
+                        inputStream = new BufferedInputStream(zipFile.getInputStream(zipEntry));
+                        File imageFile = new File(imageDirPath + "/" + zipEntry.getName());
+                        FileOutputStream fileOutputStream = new FileOutputStream(imageFile);
+                        byte[] buffer = new byte[8192];
+                        int len;
+                        while ((len = inputStream.read()) != -1) {
+                            fileOutputStream.write(buffer, 0, len);
+                            fileOutputStream.flush();
+                        }
+                        fileOutputStream.close();
+                        imageList.add(imageFile);
+                    }
+                    inputStream.close();*/
+                    FileInputStream fis = new FileInputStream(file.getAbsolutePath());
+                    ZipInputStream zipIs = new ZipInputStream(new BufferedInputStream(fis));
+                    ZipEntry zipEntry;
+                    String zipName;
+                    while ((zipEntry = zipIs.getNextEntry()) != null) {
+                        zipName = zipEntry.getName();
+                        File imageFile = new File(imageDirPath + "/" + zipName);
+                        imageFile.createNewFile();
+                        FileOutputStream out = new FileOutputStream(imageFile);
+                        int len;
+                        byte[] buffer = new byte[4096];
+                        while ((len = zipIs.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                            out.flush();
+                        }
+                        out.close();
+             /*   int len;
                 byte[] buffer = new byte[1024];
                 // read (len) bytes into buffer
                 while ((len = inZip.read(buffer)) != -1) {
@@ -283,17 +285,20 @@ public class LockScreenService extends Service {
                 out.close();
             }
         }
-        inZip.close();*//*
-
+        inZip.close();*/
+                        if (zipName.contains(".jpg") || zipName.contains(".jpeg")) {
+                            imageList.add(imageFile);
+                        }
+                    }
+                    zipIs.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            zipIs.close();*/
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        }).start();
 
-        return imageFile;
     }
 
 }

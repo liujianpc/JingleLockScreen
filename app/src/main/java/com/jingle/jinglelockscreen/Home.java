@@ -10,12 +10,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Home extends AppCompatActivity {
+public class Home extends Activity {
     private HomeChoice homeChoice;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
