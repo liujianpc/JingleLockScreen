@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class LockScreenService extends Service {
     private List<ChannelModel> channelModelList = new ArrayList<>();
     private List<File> zipFileList = new ArrayList<>();
     private List<File> imageList = new ArrayList<>();
-    private ArrayList<String> imagePathList = new ArrayList<>();
+    private static ArrayList<String> imagePathList = new ArrayList<>();
     private String response;
 /*
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -172,6 +173,7 @@ public class LockScreenService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            getImageListByDir();
             String action = intent.getAction();
             if (action.equals("android.intent.action.SCREEN_ON") || action.equals("android.intent.action.SCREEN_OF")) {
                 startIntent = new Intent(LockScreenService.this, LockScreenActivity.class);
@@ -299,6 +301,36 @@ public class LockScreenService extends Service {
             }
         }).start();
 
+    }
+
+
+    public void getImageListByDir() {
+        File sdPath = Environment.getExternalStorageDirectory();
+        File[] files = sdPath.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                if (!name.contains(".zip") && (name.contains("体育") || name.contains("生活") || name.contains("汽车") || name.contains("明星") || name.contains("时尚") || name.contains("旅行"))){
+                    return true;
+                }
+                return false;
+            }
+        });
+        for (File file: files
+             ) {
+            File[] files_inDir = file.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    if (name.contains("type") || name.contains(".xml")){
+                        return false;
+                    }
+                    return true;
+                }
+            });
+            for (File imageFile: files_inDir
+                 ) {
+                imagePathList.add(imageFile.getAbsolutePath());
+            }
+        }
     }
 
 }
