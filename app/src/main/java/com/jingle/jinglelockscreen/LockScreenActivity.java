@@ -12,13 +12,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class LockScreenActivity extends Activity {
 
@@ -31,8 +36,16 @@ public class LockScreenActivity extends Activity {
     private ImageView cameraimage;
     private ImageView messageimage;
     private ImageView phoneimage;
-    private android.widget.RelativeLayout container;
+    private android.widget.FrameLayout container;
     int messageRight, cameraTop, phoneLeft;
+    private android.widget.TextView time;
+    private android.widget.TextView dateText;
+    private android.widget.TextView weekday;
+    private String[] weekDays = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
+    private HashMap<String, TitleAndContent> titleAndContentHashMap;
+    private TextView date;
+    private TextView title;
+    private TextView content;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -43,7 +56,13 @@ public class LockScreenActivity extends Activity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lock_screen);
-        this.container = (RelativeLayout) findViewById(R.id.container);
+        this.content = (TextView) findViewById(R.id.content);
+        this.title = (TextView) findViewById(R.id.title);
+        this.date = (TextView) findViewById(R.id.date);
+        this.weekday = (TextView) findViewById(R.id.weekday);
+        this.dateText = (TextView) findViewById(R.id.date);
+        this.time = (TextView) findViewById(R.id.time);
+        this.container = (FrameLayout) findViewById(R.id.container);
         this.phoneimage = (ImageView) findViewById(R.id.phone_image);
         this.messageimage = (ImageView) findViewById(R.id.message_image);
         this.cameraimage = (ImageView) findViewById(R.id.camera_image);
@@ -96,7 +115,7 @@ public class LockScreenActivity extends Activity {
                         totalDx = Math.abs((int) event.getRawX() - firstX);
                         totalDy = Math.abs((int) event.getRawY() - firstY);
                         v.layout(left, top, right, bottom);
-                        if (Math.abs(left - messageRight) <= 10) {
+                        if (Math.abs(left - messageRight) <= 5) {
                             //打开短信
                             Intent intent = new Intent();
                             //intent.addCategory(Intent.CATEGORY_DEFAULT);
@@ -104,13 +123,13 @@ public class LockScreenActivity extends Activity {
                             intent.setType("vnd.android-dir/mms-sms");
                             startActivity(intent);
                             finish();
-                        } else if (Math.abs(phoneLeft - right) <= 10) {
+                        } else if (Math.abs(phoneLeft - right) <= 5) {
                             //打开电话
                             Intent intent = new Intent(Intent.ACTION_DIAL);
                             // intent.addCategory(Intent.CATEGORY_DEFAULT);
                             startActivity(intent);
                             finish();
-                        } else if (Math.abs(cameraTop - bottom) <= 10) {
+                        } else if (Math.abs(cameraTop - bottom) <= 5) {
                             //打开相机
                             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                             //  intent.addCategory(Intent.CATEGORY_DEFAULT);
@@ -153,14 +172,44 @@ public class LockScreenActivity extends Activity {
         initData();
         if (imagePathList != null && imagePathList.size() > 0) {
             int index = (int) (Math.random() * imagePathList.size());
-            Glide.with(this).load(imagePathList.get(index)).centerCrop().into(imageview);
+            String imagePath = imagePathList.get(index);
+            Glide.with(this).load(imagePath).centerCrop().into(imageview);
+            String imageFileName = imagePath.split("/")[5];
+            title.setText(titleAndContentHashMap.get(imageFileName).title);
+            content.setText(titleAndContentHashMap.get(imageFileName).content);
+
         }
+
+
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Calendar calendar = Calendar.getInstance();
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int minu = calendar.get(Calendar.MINUTE);
+                        int month = calendar.get(Calendar.MONTH);
+                        int date = calendar.get(Calendar.DATE);
+                        int week = calendar.get(Calendar.DAY_OF_WEEK);
+                        time.setText((hour > 9 ? hour : "0" + hour) + ":" + (minu > 9 ? minu : "0" + minu));
+                        dateText.setText((month + 1) + "月" + date + "日");
+                        weekday.setText(weekDays[week - 1]);
+
+                    }
+                });
+
+            }
+        }, 1000, 1000 * 60);
     }
 
     public void initData() {
         Intent intent = getIntent();
         if (intent != null) {
             imagePathList = intent.getStringArrayListExtra("imagePathList");
+            titleAndContentHashMap = (HashMap<String, TitleAndContent>) intent.getSerializableExtra("titleAndContentMap");
            /* for (String imagePath: imagePathList
                  ) {
                 imageList.add(new File())
@@ -169,4 +218,5 @@ public class LockScreenActivity extends Activity {
         }
 
     }
+
 }

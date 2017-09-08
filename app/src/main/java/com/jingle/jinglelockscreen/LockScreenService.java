@@ -19,6 +19,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -29,9 +33,14 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import cn.aigestudio.downloader.bizs.DLManager;
 import cn.aigestudio.downloader.interfaces.SimpleDListener;
@@ -47,6 +56,7 @@ public class LockScreenService extends Service {
     private List<File> zipFileList = new ArrayList<>();
     private List<File> imageList = new ArrayList<>();
     private static ArrayList<String> imagePathList = new ArrayList<>();
+    private static HashMap<String, TitleAndContent> titleAndContentHashMap = new HashMap<>();
     private String response;
 /*
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -192,6 +202,7 @@ public class LockScreenService extends Service {
                 startIntent = new Intent(LockScreenService.this, LockScreenActivity.class);
                 startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startIntent.putExtra("imagePathList", imagePathList);
+                startIntent.putExtra("titleAndContentMap", titleAndContentHashMap);
                 startActivity(startIntent);
             }
         }
@@ -303,9 +314,12 @@ public class LockScreenService extends Service {
         inZip.close();*/
                         if (zipName.contains(".jpg") || zipName.contains(".jpeg")) {
                             imageList.add(imageFile);
+                        } else if (zipName.contains(".xml")) {
+                            getTittleAndContentMap(imageFile);
                         }
                     }
                     zipIs.close();
+
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -319,6 +333,7 @@ public class LockScreenService extends Service {
 
     public void getImageListByDir() {
         File sdPath = Environment.getExternalStorageDirectory();
+        //查找文件夹
         File[] files = sdPath.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -328,6 +343,7 @@ public class LockScreenService extends Service {
                 return false;
             }
         });
+        //查找文件夹里面的图片
         for (File file : files
                 ) {
             File[] files_inDir = file.listFiles(new FilenameFilter() {
@@ -343,7 +359,37 @@ public class LockScreenService extends Service {
                     ) {
                 imagePathList.add(imageFile.getAbsolutePath());
             }
+            File[] xmlFiles = file.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    if (name.contains("xml")) {
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            getTittleAndContentMap(xmlFiles[0]);
         }
     }
 
+    public void getTittleAndContentMap(File xmlFile) {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(xmlFile);
+            Element root = document.getDocumentElement();
+            NodeList nodeList = root.getElementsByTagName("image");
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element element = (Element) nodeList.item(i);
+                titleAndContentHashMap.put(element.getAttribute("src"), new TitleAndContent(element.getAttribute("title"), element.getAttribute("content")));
+            }
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 }

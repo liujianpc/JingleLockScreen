@@ -1,54 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="0dp"
     tools:context="com.jingle.jinglelockscreen.LockScreenActivity">
+    <RelativeLayout
+        android:layout_margin="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
 
     <ImageView
         android:id="@+id/image_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:src="@drawable/bg"
         android:layout_margin="0dp" />
 
     <ImageButton
         android:id="@+id/close_lock"
-        android:gravity="center"
-        android:layout_margin="0dp"
-        android:contentDescription="滑动解锁"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:layout_margin="0dp"
         android:background="@drawable/unlock_selector"
-        />
+        android:contentDescription="滑动解锁"
+        android:gravity="center" />
+
     <ImageView
         android:id="@+id/camera_image"
-        android:layout_below="@id/close_lock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/camera"
+        android:layout_below="@id/close_lock"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp"
-        />
+        android:background="@drawable/camera" />
+
     <ImageView
         android:id="@+id/message_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/short_msg"
-        android:layout_toLeftOf="@id/close_lock"
-        android:layout_marginRight="80dp"
         android:layout_centerVertical="true"
-        />
+        android:layout_marginRight="80dp"
+        android:layout_toLeftOf="@id/close_lock"
+        android:background="@drawable/short_msg" />
+
     <ImageView
         android:id="@+id/phone_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/phone"
-        android:layout_toRightOf="@id/close_lock"
-        android:layout_marginLeft="80dp"
         android:layout_centerVertical="true"
-        />
+        android:layout_marginLeft="80dp"
+        android:layout_toRightOf="@id/close_lock"
+        android:background="@drawable/phone" />
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_marginTop="470dp"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="10dp"
+        android:text=""
+        android:textColor="#84D945"
+        android:textSize="50sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#84D945"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/weekday"
+            android:textColor="#84D945"
+            android:layout_marginLeft="10dp"
+            android:textSize="20sp"
+            android:text=""
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             />
+
+    </LinearLayout>
+        <View
+            android:background="#84D945"
+            android:layout_width="180dp"
+            android:layout_height="2dp" />
+        <TextView
+            android:id="@+id/title"
+            android:textColor="#84D945"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/content"
+            android:textColor="#84D945"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</FrameLayout>
