@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -89,6 +90,16 @@ public class LockScreenService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        if (hour == 8 || hour == 12) {
+            getImageListByNetDownload();
+        }
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void getImageListByNetDownload() {
         getJson("http://servicesupport1.hicloud.com:8080/servicesupport/theme/getThemeMagazine.do?language=Chinese&themename=Balance%28magazine%29&author=Huawei+Emotion+UI&version=2.3&screen=1920*1080&phoneType=ATH-TL00H&buildNumber=ATH-TL00HC01B399&isoCode=CN&versionCode=40000");
         try {
             Thread.sleep(2000);
@@ -163,9 +174,6 @@ public class LockScreenService extends Service {
 
             }
         }
-
-
-        return super.onStartCommand(intent, flags, startId);
     }
 
     class MyReceiver extends BroadcastReceiver {
@@ -173,6 +181,11 @@ public class LockScreenService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Calendar calendar = Calendar.getInstance();
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            if (hour == 8 || hour == 12) {
+                getImageListByNetDownload();
+            }
             getImageListByDir();
             String action = intent.getAction();
             if (action.equals("android.intent.action.SCREEN_ON") || action.equals("android.intent.action.SCREEN_OF")) {
@@ -309,25 +322,25 @@ public class LockScreenService extends Service {
         File[] files = sdPath.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                if (!name.contains(".zip") && (name.contains("体育") || name.contains("生活") || name.contains("汽车") || name.contains("明星") || name.contains("时尚") || name.contains("旅行"))){
+                if (!name.contains(".zip") && (name.contains("体育") || name.contains("生活") || name.contains("汽车") || name.contains("明星") || name.contains("时尚") || name.contains("旅行"))) {
                     return true;
                 }
                 return false;
             }
         });
-        for (File file: files
-             ) {
+        for (File file : files
+                ) {
             File[] files_inDir = file.listFiles(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String name) {
-                    if (name.contains("type") || name.contains(".xml")){
+                    if (name.contains("type") || name.contains(".xml")) {
                         return false;
                     }
                     return true;
                 }
             });
-            for (File imageFile: files_inDir
-                 ) {
+            for (File imageFile : files_inDir
+                    ) {
                 imagePathList.add(imageFile.getAbsolutePath());
             }
         }

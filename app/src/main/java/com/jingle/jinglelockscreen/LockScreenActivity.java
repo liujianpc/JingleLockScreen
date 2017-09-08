@@ -24,6 +24,8 @@ public class LockScreenActivity extends Activity {
     private android.widget.ImageButton closelock;
     //private List<File> imageList = new ArrayList<>();
     private ArrayList<String> imagePathList;
+    int screenWidth_other;
+    int screenHeight_other;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -40,16 +42,31 @@ public class LockScreenActivity extends Activity {
         final int screenHeight = getResources().getDisplayMetrics().heightPixels;
         closelock.setOnTouchListener(new View.OnTouchListener() {
             int lastX, lastY;
+            int firstX, firstY;
+            int totalDx, totalDy;
+            int firstViewLfet, firstViewRight, firstViewTop, firstViewBottom;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int eventAction = event.getAction();
                 switch (eventAction) {
+                    //按下时的绝对位置
                     case MotionEvent.ACTION_DOWN:
                         lastX = (int) event.getRawX();
                         lastY = (int) event.getRawY();
+                        firstX = lastX;
+                        firstY = lastY;
+                        firstViewLfet = v.getLeft();
+                        firstViewRight = v.getRight();
+                        firstViewTop = v.getTop();
+                        firstViewBottom = v.getBottom();
+
+                        screenWidth_other = v.getWidth();
+                        screenHeight_other = v.getHeight();
                         break;
+                    //移动时的绝对位置
                     case MotionEvent.ACTION_MOVE:
+                        //移动的位移差值
                         int dx = (int) event.getRawX() - lastX;
                         int dy = (int) event.getRawY() - lastY;
                         //相对于parent 的View上下左右位置
@@ -57,16 +74,17 @@ public class LockScreenActivity extends Activity {
                         int top = v.getTop() + dy;
                         int right = v.getRight() + dx;
                         int bottom = v.getBottom() + dy;
+/*
 
-                        /*//如果left < 0，则是左移，右边框上次位置加上左移部分
+                        //如果left < 0，则是左移，右边框上次位置加上左移部分
                         if (left < 0) {
                             left = 0;
                             right = left + v.getWidth();
                         }
 
                         //
-                        if (right > screenWidth) {
-                            right = screenWidth;
+                        if (right > screenWidth_other) {
+                            right = screenWidth_other;
                             left = right - v.getWidth();
                         }
 
@@ -76,19 +94,29 @@ public class LockScreenActivity extends Activity {
                             bottom = top + v.getHeight();
                         }
 
-                        if (bottom > screenHeight) {
-                            bottom = screenHeight;
+                        if (bottom > screenHeight_other) {
+                            bottom = screenHeight_other;
                             top = bottom - v.getHeight();
                         }
 */
+
                         //重新layout
+                        lastX = (int) event.getRawX();
+                        lastY = (int) event.getRawY();
+                        totalDx = Math.abs((int) event.getRawX() - firstX);
+                        totalDy = Math.abs((int) event.getRawY() - firstY);
                         v.layout(left, top, right, bottom);
-                        if (dx >= 100 || dy >= 100) {
+                        if (totalDx >= 400 || totalDy >= 400) {
                             finish();
                         }
 
                         break;
                     case MotionEvent.ACTION_UP:
+                        if (totalDx >= 400 || totalDy >= 400) {
+                            finish();
+                        } else {
+                            v.layout(firstViewLfet, firstViewTop, firstViewRight, firstViewBottom);
+                        }
                         break;
                 }
 
