@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 
@@ -26,6 +28,11 @@ public class LockScreenActivity extends Activity {
     private ArrayList<String> imagePathList;
     int screenWidth_other;
     int screenHeight_other;
+    private ImageView cameraimage;
+    private ImageView messageimage;
+    private ImageView phoneimage;
+    private android.widget.RelativeLayout container;
+    int messageRight, cameraTop, phoneLeft;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -36,6 +43,10 @@ public class LockScreenActivity extends Activity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lock_screen);
+        this.container = (RelativeLayout) findViewById(R.id.container);
+        this.phoneimage = (ImageView) findViewById(R.id.phone_image);
+        this.messageimage = (ImageView) findViewById(R.id.message_image);
+        this.cameraimage = (ImageView) findViewById(R.id.camera_image);
         this.closelock = (ImageButton) findViewById(R.id.close_lock);
         this.imageview = (ImageView) findViewById(R.id.image_view);
         final int screenWidth = getResources().getDisplayMetrics().widthPixels;
@@ -46,12 +57,16 @@ public class LockScreenActivity extends Activity {
             int totalDx, totalDy;
             int firstViewLfet, firstViewRight, firstViewTop, firstViewBottom;
 
+            //浮动按钮
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int eventAction = event.getAction();
                 switch (eventAction) {
                     //按下时的绝对位置
                     case MotionEvent.ACTION_DOWN:
+                        messageRight = messageimage.getRight();
+                        cameraTop = cameraimage.getTop();
+                        phoneLeft = phoneimage.getLeft();
                         lastX = (int) event.getRawX();
                         lastY = (int) event.getRawY();
                         firstX = lastX;
@@ -74,31 +89,6 @@ public class LockScreenActivity extends Activity {
                         int top = v.getTop() + dy;
                         int right = v.getRight() + dx;
                         int bottom = v.getBottom() + dy;
-/*
-
-                        //如果left < 0，则是左移，右边框上次位置加上左移部分
-                        if (left < 0) {
-                            left = 0;
-                            right = left + v.getWidth();
-                        }
-
-                        //
-                        if (right > screenWidth_other) {
-                            right = screenWidth_other;
-                            left = right - v.getWidth();
-                        }
-
-                        //如果top < 0，则是上移，下边框上次位置加上移部分
-                        if (top < 0) {
-                            top = 0;
-                            bottom = top + v.getHeight();
-                        }
-
-                        if (bottom > screenHeight_other) {
-                            bottom = screenHeight_other;
-                            top = bottom - v.getHeight();
-                        }
-*/
 
                         //重新layout
                         lastX = (int) event.getRawX();
@@ -106,13 +96,34 @@ public class LockScreenActivity extends Activity {
                         totalDx = Math.abs((int) event.getRawX() - firstX);
                         totalDy = Math.abs((int) event.getRawY() - firstY);
                         v.layout(left, top, right, bottom);
-                        if (totalDx >= 400 || totalDy >= 400) {
+                        if (Math.abs(left - messageRight) <= 10) {
+                            //打开短信
+                            Intent intent = new Intent();
+                            //intent.addCategory(Intent.CATEGORY_DEFAULT);
+                            intent.setAction(Intent.ACTION_VIEW);
+                            intent.setType("vnd.android-dir/mms-sms");
+                            startActivity(intent);
+                            finish();
+                        } else if (Math.abs(phoneLeft - right) <= 10) {
+                            //打开电话
+                            Intent intent = new Intent(Intent.ACTION_DIAL);
+                            // intent.addCategory(Intent.CATEGORY_DEFAULT);
+                            startActivity(intent);
+                            finish();
+                        } else if (Math.abs(cameraTop - bottom) <= 10) {
+                            //打开相机
+                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            //  intent.addCategory(Intent.CATEGORY_DEFAULT);
+                            startActivity(intent);
+                            finish();
+
+                        } else if (totalDx >= 500 || totalDy >= 500) {
                             finish();
                         }
 
                         break;
                     case MotionEvent.ACTION_UP:
-                        if (totalDx >= 400 || totalDy >= 400) {
+                        if (totalDx >= 500 || totalDy >= 500) {
                             finish();
                         } else {
                             v.layout(firstViewLfet, firstViewTop, firstViewRight, firstViewBottom);

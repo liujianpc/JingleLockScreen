@@ -23,5 +23,32 @@
         android:layout_centerInParent="true"
         android:background="@drawable/unlock_selector"
         />
+    <ImageView
+        android:id="@+id/camera_image"
+        android:layout_below="@id/close_lock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/camera"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        />
+    <ImageView
+        android:id="@+id/message_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/short_msg"
+        android:layout_toLeftOf="@id/close_lock"
+        android:layout_marginRight="80dp"
+        android:layout_centerVertical="true"
+        />
+    <ImageView
+        android:id="@+id/phone_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/phone"
+        android:layout_toRightOf="@id/close_lock"
+        android:layout_marginLeft="80dp"
+        android:layout_centerVertical="true"
+        />
 
 </RelativeLayout>
