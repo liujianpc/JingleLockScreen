@@ -337,7 +337,7 @@ public class LockScreenService extends Service {
         File[] files = sdPath.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                if (!name.contains(".zip") && (name.contains("体育") || name.contains("生活") || name.contains("汽车") || name.contains("明星") || name.contains("时尚") || name.contains("旅行"))) {
+                if ((new File(dir+"/"+name)).isDirectory() && !name.contains(".zip") && (name.contains("体育") || name.contains("生活") || name.contains("汽车") || name.contains("明星") || name.contains("时尚") || name.contains("旅行"))) {
                     return true;
                 }
                 return false;
